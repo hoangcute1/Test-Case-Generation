@@ -1,0 +1,29 @@
+# Webservice
+python-dotenv
+pydantic
+pydantic-settings
+fastapi
+uvicorn
+httpx
+
+# LLM
+ollama
+
+# Database
+sqlalchemy
+sqlalchemy_utils
+sqlalchemy[asyncio]
+asyncpg
+
+# Memory
+redis[hiredis]
+
+# Vector Database
+chromadb
+
+# Extras
+atlassian-python-api
+Werkzeug
+authlib
+itsdangerous
+xlsxwriter

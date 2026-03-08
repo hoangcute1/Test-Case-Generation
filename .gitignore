@@ -1,0 +1,30 @@
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment files (security)
+.env
+.env.local
+.env.*.local
+
+# Dependencies  
+node_modules/
+
+# Build outputs
+dist/
+build/
+web-build/
+
+# Expo
+.expo/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/

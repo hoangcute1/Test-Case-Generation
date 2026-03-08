@@ -1,0 +1,104 @@
+import React from "react";
+import {
+  NavigationContainer,
+  DefaultTheme,
+  DarkTheme,
+} from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { useTheme } from "../context/ThemeContext";
+import { RootStackParamList } from "./types";
+
+import LandingScreen from "../screens/auth/LandingScreen";
+import JiraAuthScreen from "../screens/auth/JiraAuthScreen";
+import DashboardTabs from "./DashboardTabs";
+import IssuesScreen from "../screens/dashboard/IssuesScreen";
+import CollectionDetailScreen from "../screens/postman/CollectionDetailScreen";
+import CollectionPickerScreen from "../screens/postman/CollectionPickerScreen";
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
+
+/**
+ * Root navigator.
+ *
+ * Web route mapping:
+ *   /                          → Landing
+ *   /auth/jira                 → JiraAuth
+ *   /dashboard/*               → Dashboard (tabs)
+ *   /dashboard/projects/:key   → Issues (stack push)
+ *   /dashboard/postman/collection/:id → CollectionDetail (stack push)
+ */
+const RootNavigator: React.FC = () => {
+  const { colors, isDark } = useTheme();
+
+  const navTheme = {
+    ...(isDark ? DarkTheme : DefaultTheme),
+    colors: {
+      ...(isDark ? DarkTheme : DefaultTheme).colors,
+      background: colors.background,
+      card: colors.card,
+      text: colors.text,
+      border: colors.border,
+      primary: colors.primary,
+    },
+  };
+
+  return (
+    <NavigationContainer theme={navTheme}>
+      <Stack.Navigator
+        initialRouteName="Landing"
+        screenOptions={{
+          headerStyle: { backgroundColor: colors.card },
+          headerTintColor: colors.text,
+          headerShadowVisible: false,
+          headerTitleStyle: { fontWeight: "600" },
+          contentStyle: { backgroundColor: colors.background },
+        }}
+      >
+        <Stack.Screen
+          name="Landing"
+          component={LandingScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="JiraAuth"
+          component={JiraAuthScreen}
+          options={{
+            title: "Jira Login",
+            headerBackTitle: "Back",
+          }}
+        />
+        <Stack.Screen
+          name="Dashboard"
+          component={DashboardTabs}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Issues"
+          component={IssuesScreen}
+          options={({ route }) => ({
+            title: `${(route.params as { projectKey: string }).projectKey} Issues`,
+            headerBackTitle: "Projects",
+          })}
+        />
+        <Stack.Screen
+          name="CollectionDetail"
+          component={CollectionDetailScreen}
+          options={{
+            title: "Collection Details",
+            headerBackTitle: "Back",
+          }}
+        />
+        <Stack.Screen
+          name="CollectionPicker"
+          component={CollectionPickerScreen}
+          options={{
+            title: "Select Collection",
+            presentation: "modal",
+          }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+};
+
+export default RootNavigator;
