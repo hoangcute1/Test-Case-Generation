@@ -21,14 +21,28 @@ type Props = {
 
 const SettingsScreen: React.FC<Props> = ({ navigation }) => {
   const { colors, isDark, toggle } = useTheme();
-  const { jiraUser, isJiraAuthenticated, isPostmanAuthenticated, logoutAll } =
-    useAuthStore();
+  const {
+    jiraUser,
+    isJiraAuthenticated,
+    isPostmanAuthenticated,
+    isAuthenticated,
+    authUser,
+    logout,
+    logoutAll,
+  } = useAuthStore();
   const { reset } = useAppStore();
 
   const handleLogout = () => {
     logoutAll();
     reset();
     Toast.show({ type: "info", text1: "Logged out successfully" });
+    navigation.reset({ index: 0, routes: [{ name: "Landing" }] });
+  };
+
+  const handleLogoutAccount = () => {
+    logout();
+    reset();
+    Toast.show({ type: "info", text1: "Account logged out" });
     navigation.reset({ index: 0, routes: [{ name: "Landing" }] });
   };
 
@@ -43,7 +57,54 @@ const SettingsScreen: React.FC<Props> = ({ navigation }) => {
         </Text>
       </View>
 
-      {/* Profile */}
+      {/* Local Auth Profile */}
+      {isAuthenticated && authUser && (
+        <Card>
+          <View style={styles.profileRow}>
+            <View
+              style={[
+                styles.avatarCircle,
+                { backgroundColor: colors.orange },
+              ]}
+            >
+              <Text
+                style={[styles.avatarText, { color: colors.primaryForeground }]}
+              >
+                {authUser.name?.charAt(0) || "U"}
+              </Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <Text style={[styles.userName, { color: colors.text }]}>
+                  {authUser.name}
+                </Text>
+                <View
+                  style={[
+                    styles.roleBadge,
+                    {
+                      backgroundColor: colors.orange + "15",
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.roleBadgeText,
+                      { color: colors.orange },
+                    ]}
+                  >
+                    Admin
+                  </Text>
+                </View>
+              </View>
+              <Text style={[styles.userEmail, { color: colors.textSecondary }]}>
+                {authUser.email}
+              </Text>
+            </View>
+          </View>
+        </Card>
+      )}
+
+      {/* Jira Profile */}
       {isJiraAuthenticated && jiraUser && (
         <Card>
           <View style={styles.profileRow}>
@@ -73,7 +134,25 @@ const SettingsScreen: React.FC<Props> = ({ navigation }) => {
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
           Connections
         </Text>
-        <View style={styles.statusRow}>
+        {isAuthenticated && (
+          <View style={styles.statusRow}>
+            <Ionicons
+              name="person-circle-outline"
+              size={20}
+              color={colors.success}
+            />
+            <Text style={[styles.statusLabel, { color: colors.text }]}>
+              Account
+            </Text>
+            <View
+              style={[styles.statusDot, { backgroundColor: colors.success }]}
+            />
+            <Text style={{ color: colors.success, fontSize: 12 }}>
+              Admin
+            </Text>
+          </View>
+        )}
+        <View style={[styles.statusRow, isAuthenticated && { marginTop: 12 }]}>
           <Ionicons
             name="git-branch-outline"
             size={20}
@@ -157,22 +236,51 @@ const SettingsScreen: React.FC<Props> = ({ navigation }) => {
       </Card>
 
       {/* Logout */}
-      <TouchableOpacity
-        style={[
-          styles.logoutBtn,
-          {
-            backgroundColor: colors.destructive + "15",
-            borderColor: colors.destructive + "30",
-          },
-        ]}
-        onPress={handleLogout}
-        activeOpacity={0.7}
-      >
-        <Ionicons name="log-out-outline" size={20} color={colors.destructive} />
-        <Text style={[styles.logoutText, { color: colors.destructive }]}>
-          Log out
-        </Text>
-      </TouchableOpacity>
+      {isAuthenticated && (
+        <TouchableOpacity
+          style={[
+            styles.logoutBtn,
+            {
+              backgroundColor: colors.destructive + "15",
+              borderColor: colors.destructive + "30",
+            },
+          ]}
+          onPress={handleLogoutAccount}
+          activeOpacity={0.7}
+        >
+          <Ionicons
+            name="log-out-outline"
+            size={20}
+            color={colors.destructive}
+          />
+          <Text style={[styles.logoutText, { color: colors.destructive }]}>
+            Log out (Admin Account)
+          </Text>
+        </TouchableOpacity>
+      )}
+      {(isJiraAuthenticated || isPostmanAuthenticated) && (
+        <TouchableOpacity
+          style={[
+            styles.logoutBtn,
+            {
+              backgroundColor: colors.destructive + "15",
+              borderColor: colors.destructive + "30",
+              marginTop: isAuthenticated ? 0 : 20,
+            },
+          ]}
+          onPress={handleLogout}
+          activeOpacity={0.7}
+        >
+          <Ionicons
+            name="log-out-outline"
+            size={20}
+            color={colors.destructive}
+          />
+          <Text style={[styles.logoutText, { color: colors.destructive }]}>
+            Log out All Services
+          </Text>
+        </TouchableOpacity>
+      )}
     </ScrollView>
   );
 };
@@ -199,6 +307,12 @@ const styles = StyleSheet.create({
   avatarText: { fontSize: 18, fontWeight: "700" },
   userName: { fontSize: 16, fontWeight: "600" },
   userEmail: { fontSize: 13, marginTop: 2 },
+  roleBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  roleBadgeText: { fontSize: 11, fontWeight: "600" },
   sectionTitle: { fontSize: 15, fontWeight: "600", marginBottom: 12 },
   statusRow: {
     flexDirection: "row",

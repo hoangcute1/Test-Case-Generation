@@ -1,5 +1,7 @@
 export type RootStackParamList = {
   Landing: undefined;
+  Login: undefined;
+  ForgotPassword: undefined;
   JiraAuth: undefined;
   Dashboard: undefined;
   Issues: { projectKey: string };

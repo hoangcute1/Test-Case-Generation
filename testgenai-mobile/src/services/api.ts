@@ -261,4 +261,50 @@ export const api = {
       },
     );
   },
+
+  // ==================== AUTH (User/Admin) ====================
+
+  async login(
+    email: string,
+    password: string,
+  ): Promise<{
+    success: boolean;
+    user?: { name: string; email: string; role: "admin" };
+    token?: string;
+    error?: string;
+  }> {
+    try {
+      const response = await apiCall("/auth/login", {
+        method: "POST",
+        body: JSON.stringify({ email, password, role: "admin" }),
+      });
+      return {
+        success: true,
+        user: response.user,
+        token: response.token || response.access_token,
+      };
+    } catch (err) {
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : "Login failed",
+      };
+    }
+  },
+
+  async forgotPassword(
+    email: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      await apiCall("/auth/forgot-password", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+      return { success: true };
+    } catch (err) {
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : "Request failed",
+      };
+    }
+  },
 };

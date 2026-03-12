@@ -42,13 +42,14 @@ const features = [
 
 const LandingScreen: React.FC<Props> = ({ navigation }) => {
   const { colors, isDark } = useTheme();
-  const { isJiraAuthenticated, isPostmanAuthenticated } = useAuthStore();
+  const { isJiraAuthenticated, isPostmanAuthenticated, isAuthenticated, authUser } =
+    useAuthStore();
 
   const handleGetStarted = () => {
-    if (isJiraAuthenticated) {
+    if (isAuthenticated || isJiraAuthenticated) {
       navigation.navigate("Dashboard");
     } else {
-      navigation.navigate("JiraAuth");
+      navigation.navigate("Login");
     }
   };
 
@@ -70,6 +71,32 @@ const LandingScreen: React.FC<Props> = ({ navigation }) => {
         </View>
         <Text style={[styles.logoText, { color: colors.text }]}>TestGenAI</Text>
         <View style={{ flex: 1 }} />
+        {isAuthenticated && (
+          <View
+            style={[
+              styles.statusPill,
+              {
+                backgroundColor: colors.orange + "15",
+                borderColor: colors.orange + "30",
+              },
+            ]}
+          >
+            <View
+              style={[
+                styles.dot,
+                { backgroundColor: colors.orange },
+              ]}
+            />
+            <Text
+              style={[
+                styles.statusText,
+                { color: colors.orange },
+              ]}
+            >
+              Admin
+            </Text>
+          </View>
+        )}
         {isJiraAuthenticated && (
           <View
             style={[
@@ -114,34 +141,69 @@ const LandingScreen: React.FC<Props> = ({ navigation }) => {
         </Text>
 
         <View style={styles.heroButtons}>
-          {isJiraAuthenticated ? (
-            <Button
-              title="Go to Dashboard"
-              onPress={() => navigation.navigate("Dashboard")}
-              variant="primary"
-              size="lg"
-              icon={
-                <Ionicons
-                  name="arrow-forward"
-                  size={16}
-                  color={colors.primaryForeground}
-                />
-              }
-            />
+          {isAuthenticated || isJiraAuthenticated ? (
+            <>
+              <Button
+                title="Go to Dashboard"
+                onPress={() => navigation.navigate("Dashboard")}
+                variant="primary"
+                size="lg"
+                icon={
+                  <Ionicons
+                    name="arrow-forward"
+                    size={16}
+                    color={colors.primaryForeground}
+                  />
+                }
+              />
+              {authUser && (
+                <View
+                  style={[
+                    styles.loggedInBadge,
+                    {
+                      backgroundColor: colors.success + "15",
+                      borderColor: colors.success + "30",
+                    },
+                  ]}
+                >
+                  <View
+                    style={[styles.dot, { backgroundColor: colors.success }]}
+                  />
+                  <Text style={{ color: colors.success, fontSize: 12, fontWeight: "500" }}>
+                    Signed in as Admin: {authUser.name}
+                  </Text>
+                </View>
+              )}
+            </>
           ) : (
-            <Button
-              title="Connect with Jira"
-              onPress={handleJiraConnect}
-              variant="primary"
-              size="lg"
-              icon={
-                <Ionicons
-                  name="log-in-outline"
-                  size={16}
-                  color={colors.primaryForeground}
-                />
-              }
-            />
+            <>
+              <Button
+                title="Admin Sign In"
+                onPress={() => navigation.navigate("Login")}
+                variant="orange"
+                size="lg"
+                icon={
+                  <Ionicons
+                    name="shield-checkmark-outline"
+                    size={16}
+                    color={colors.primaryForeground}
+                  />
+                }
+              />
+              <Button
+                title="Connect with Jira"
+                onPress={handleJiraConnect}
+                variant="outline"
+                size="lg"
+                icon={
+                  <Ionicons
+                    name="git-branch-outline"
+                    size={16}
+                    color={colors.text}
+                  />
+                }
+              />
+            </>
           )}
         </View>
 
@@ -252,6 +314,16 @@ const styles = StyleSheet.create({
   heroButtons: {
     width: "100%",
     gap: 12,
+  },
+  loggedInBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    gap: 6,
   },
   allConnected: {
     flexDirection: "row",

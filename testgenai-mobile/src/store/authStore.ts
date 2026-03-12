@@ -7,7 +7,18 @@ interface User {
   avatar?: string;
 }
 
+interface AuthUser {
+  name: string;
+  email: string;
+  role: "admin";
+}
+
 interface AuthState {
+  // Local auth (email/password)
+  authUser: AuthUser | null;
+  authToken: string | null;
+  isAuthenticated: boolean;
+
   // Jira
   jiraUser: User | null;
   jiraToken: string | null;
@@ -19,6 +30,8 @@ interface AuthState {
 
   // Actions
   initAuth: () => Promise<void>;
+  login: (user: AuthUser, token: string) => Promise<void>;
+  logout: () => Promise<void>;
   loginJira: (user: User, token: string, session: string) => Promise<void>;
   logoutJira: () => Promise<void>;
   loginPostman: (apiKey: string) => Promise<void>;
@@ -27,6 +40,9 @@ interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
+  authUser: null,
+  authToken: null,
+  isAuthenticated: false,
   jiraUser: null,
   jiraToken: null,
   isJiraAuthenticated: false,
@@ -37,18 +53,45 @@ export const useAuthStore = create<AuthState>((set) => ({
    * Hydrate auth state from secure storage on app startup
    */
   initAuth: async () => {
-    const [user, token, postmanKey] = await Promise.all([
+    const [authUser, authToken, user, token, postmanKey] = await Promise.all([
+      storage.getAuthUser(),
+      storage.getAuthToken(),
       storage.getJiraUser(),
       storage.getJiraToken(),
       storage.getPostmanApiKey(),
     ]);
 
     set({
+      authUser: authUser as AuthUser | null,
+      authToken: authToken,
+      isAuthenticated: !!(authUser && authToken),
       jiraUser: user,
       jiraToken: token,
       isJiraAuthenticated: !!(user && token),
       postmanApiKey: postmanKey,
       isPostmanAuthenticated: !!postmanKey,
+    });
+  },
+
+  login: async (user, token) => {
+    await Promise.all([
+      storage.setAuthUser(user),
+      storage.setAuthToken(token),
+      storage.setAuthRole(user.role),
+    ]);
+    set({
+      authUser: user,
+      authToken: token,
+      isAuthenticated: true,
+    });
+  },
+
+  logout: async () => {
+    await storage.clearAuth();
+    set({
+      authUser: null,
+      authToken: null,
+      isAuthenticated: false,
     });
   },
 
@@ -93,6 +136,9 @@ export const useAuthStore = create<AuthState>((set) => ({
   logoutAll: async () => {
     await storage.clearAll();
     set({
+      authUser: null,
+      authToken: null,
+      isAuthenticated: false,
       jiraUser: null,
       jiraToken: null,
       isJiraAuthenticated: false,

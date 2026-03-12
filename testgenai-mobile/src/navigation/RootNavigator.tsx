@@ -9,6 +9,8 @@ import { useTheme } from "../context/ThemeContext";
 import { RootStackParamList } from "./types";
 
 import LandingScreen from "../screens/auth/LandingScreen";
+import LoginScreen from "../screens/auth/LoginScreen";
+import ForgotPasswordScreen from "../screens/auth/ForgotPasswordScreen";
 import JiraAuthScreen from "../screens/auth/JiraAuthScreen";
 import DashboardTabs from "./DashboardTabs";
 import IssuesScreen from "../screens/dashboard/IssuesScreen";
@@ -58,6 +60,22 @@ const RootNavigator: React.FC = () => {
           name="Landing"
           component={LandingScreen}
           options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{
+            title: "Admin Sign In",
+            headerBackTitle: "Back",
+          }}
+        />
+        <Stack.Screen
+          name="ForgotPassword"
+          component={ForgotPasswordScreen}
+          options={{
+            title: "Reset Password",
+            headerBackTitle: "Back",
+          }}
         />
         <Stack.Screen
           name="JiraAuth"

@@ -10,6 +10,9 @@ const KEYS = {
   JIRA_TOKEN: "jira_token",
   JIRA_TOKEN_EXP: "jira_token_exp",
   POSTMAN_API_KEY: "postman_apikey",
+  AUTH_USER: "auth_user",
+  AUTH_TOKEN: "auth_token",
+  AUTH_ROLE: "auth_role",
 } as const;
 
 /**
@@ -132,8 +135,47 @@ export const storage = {
     await this.remove(KEYS.POSTMAN_API_KEY);
   },
 
+  // Local auth helpers
+  async setAuthUser(user: { name: string; email: string; role: string }): Promise<void> {
+    await this.set(KEYS.AUTH_USER, JSON.stringify(user));
+  },
+
+  async getAuthUser(): Promise<{ name: string; email: string; role: string } | null> {
+    const raw = await this.get(KEYS.AUTH_USER);
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  },
+
+  async setAuthToken(token: string): Promise<void> {
+    await this.set(KEYS.AUTH_TOKEN, token);
+  },
+
+  async getAuthToken(): Promise<string | null> {
+    return this.get(KEYS.AUTH_TOKEN);
+  },
+
+  async setAuthRole(role: string): Promise<void> {
+    await this.set(KEYS.AUTH_ROLE, role);
+  },
+
+  async getAuthRole(): Promise<string | null> {
+    return this.get(KEYS.AUTH_ROLE);
+  },
+
+  async clearAuth(): Promise<void> {
+    await Promise.all([
+      this.remove(KEYS.AUTH_USER),
+      this.remove(KEYS.AUTH_TOKEN),
+      this.remove(KEYS.AUTH_ROLE),
+    ]);
+  },
+
   async clearAll(): Promise<void> {
-    await Promise.all([this.clearJira(), this.clearPostman()]);
+    await Promise.all([this.clearJira(), this.clearPostman(), this.clearAuth()]);
   },
 };
 
