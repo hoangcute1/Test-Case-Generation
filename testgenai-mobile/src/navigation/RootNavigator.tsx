@@ -16,6 +16,8 @@ import DashboardTabs from "./DashboardTabs";
 import IssuesScreen from "../screens/dashboard/IssuesScreen";
 import CollectionDetailScreen from "../screens/postman/CollectionDetailScreen";
 import CollectionPickerScreen from "../screens/postman/CollectionPickerScreen";
+import UserManagementScreen from "../screens/admin/UserManagementScreen";
+import AdminTestCasesScreen from "../screens/admin/AdminTestCasesScreen";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -112,6 +114,22 @@ const RootNavigator: React.FC = () => {
           options={{
             title: "Select Collection",
             presentation: "modal",
+          }}
+        />
+        <Stack.Screen
+          name="UserManagement"
+          component={UserManagementScreen}
+          options={{
+            title: "User Management",
+            headerBackTitle: "Back",
+          }}
+        />
+        <Stack.Screen
+          name="AdminTestCases"
+          component={AdminTestCasesScreen}
+          options={{
+            title: "Test Cases",
+            headerBackTitle: "Back",
           }}
         />
       </Stack.Navigator>

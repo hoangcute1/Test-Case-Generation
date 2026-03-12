@@ -4,6 +4,9 @@ import {
   JiraProject,
   PostmanCollection,
   PostmanCollectionDetail,
+  AdminUser,
+  AdminStats,
+  AdminTestCase,
 } from "../types/jira";
 import { storage } from "./storage";
 
@@ -45,6 +48,22 @@ const withSession = async (
   }
   return {
     "x-session-token": session,
+    ...extraHeaders,
+  };
+};
+
+/**
+ * Helper to attach auth token header to admin requests
+ */
+const withAuth = async (
+  extraHeaders?: Record<string, string>,
+): Promise<Record<string, string>> => {
+  const token = await storage.getAuthToken();
+  if (!token) {
+    throw new Error("Please sign in as admin first");
+  }
+  return {
+    Authorization: `Bearer ${token}`,
     ...extraHeaders,
   };
 };
@@ -306,5 +325,60 @@ export const api = {
         error: err instanceof Error ? err.message : "Request failed",
       };
     }
+  },
+
+  // ==================== ADMIN ====================
+
+  async getAdminStats(): Promise<AdminStats> {
+    const headers = await withAuth();
+    return apiCall("/admin/stats", { method: "GET", headers });
+  },
+
+  async getUsers(): Promise<AdminUser[]> {
+    const headers = await withAuth();
+    const response = await apiCall("/admin/users", { method: "GET", headers });
+    return Array.isArray(response) ? response : response.users || [];
+  },
+
+  async softDeleteUser(userId: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const headers = await withAuth();
+      await apiCall(`/admin/users/${encodeURIComponent(userId)}/soft-delete`, {
+        method: "PATCH",
+        headers,
+      });
+      return { success: true };
+    } catch (err) {
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : "Failed to delete user",
+      };
+    }
+  },
+
+  async restoreUser(userId: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const headers = await withAuth();
+      await apiCall(`/admin/users/${encodeURIComponent(userId)}/restore`, {
+        method: "PATCH",
+        headers,
+      });
+      return { success: true };
+    } catch (err) {
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : "Failed to restore user",
+      };
+    }
+  },
+
+  async getAdminTestCases(projectKey?: string): Promise<AdminTestCase[]> {
+    const headers = await withAuth();
+    const query = projectKey ? `?projectKey=${encodeURIComponent(projectKey)}` : "";
+    const response = await apiCall(`/admin/testcases${query}`, {
+      method: "GET",
+      headers,
+    });
+    return Array.isArray(response) ? response : response.testcases || [];
   },
 };

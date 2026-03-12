@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
 import { TabParamList } from "./types";
 
+import AdminDashboardScreen from "../screens/admin/AdminDashboardScreen";
 import ProjectsScreen from "../screens/dashboard/ProjectsScreen";
 import PostmanScreen from "../screens/postman/PostmanScreen";
 import SettingsScreen from "../screens/dashboard/SettingsScreen";
@@ -13,9 +14,10 @@ const Tab = createBottomTabNavigator<TabParamList>();
 /**
  * Bottom Tab Navigator — replaces the web sidebar.
  * Maps to the web DashboardLayout's nav items:
- *   - Projects → ProjectsTab
- *   - Postman  → PostmanTab
- *   - Settings → SettingsTab
+ *   - Admin     → AdminTab (admin dashboard)
+ *   - Projects  → ProjectsTab
+ *   - Postman   → PostmanTab
+ *   - Settings  → SettingsTab
  */
 const DashboardTabs: React.FC = () => {
   const { colors } = useTheme();
@@ -39,6 +41,16 @@ const DashboardTabs: React.FC = () => {
         },
       }}
     >
+      <Tab.Screen
+        name="AdminTab"
+        component={AdminDashboardScreen}
+        options={{
+          tabBarLabel: "Admin",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="shield-outline" size={size} color={color} />
+          ),
+        }}
+      />
       <Tab.Screen
         name="ProjectsTab"
         component={ProjectsScreen}
