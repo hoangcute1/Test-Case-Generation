@@ -12,7 +12,11 @@ from fastapi.middleware.cors import CORSMiddleware
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Initialize external dependencies during application startup
-    await ollama_init()
+    try:
+        await ollama_init()
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning(f"Ollama init skipped: {e}")
     yield
 
 
@@ -25,7 +29,13 @@ app = FastAPI(
 # CORS middleware for handling cross-origin requests
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:*"],
+    allow_origins=[
+        "http://localhost:5173", # Vite web
+        "http://localhost:8000", # Self
+        "http://localhost:19006", # Expo web
+        "http://localhost:19000", # Expo metro
+        "http://localhost:8081", # Metro default
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

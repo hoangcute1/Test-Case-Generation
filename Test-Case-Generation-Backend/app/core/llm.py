@@ -144,7 +144,7 @@ async def ollama_init() -> None:
             await ollama_client.create(
                 model=str(settings.CUSTOM_LLM_MODEL),
                 from_=str(settings.LOCAL_LLM_MODEL),
-                system=OLLAMA_SYSTEM_PROMPT
+                system=SWD_MODEL_SYSTEM_PROMPT
             )
     except Exception as e:
         # Log stack trace for diagnostics and propagate a domain-specific failure

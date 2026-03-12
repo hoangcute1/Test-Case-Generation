@@ -26,27 +26,22 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const { colors } = useTheme();
   const { login } = useAuthStore();
 
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
+  const [errors, setErrors] = useState<{ username?: string; password?: string }>(
     {},
   );
 
   const validate = (): boolean => {
-    const newErrors: { email?: string; password?: string } = {};
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const newErrors: { username?: string; password?: string } = {};
 
-    if (!email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!emailRegex.test(email.trim())) {
-      newErrors.email = "Please enter a valid email";
+    if (!username.trim()) {
+      newErrors.username = "Username is required";
     }
 
     if (!password) {
       newErrors.password = "Password is required";
-    } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
     }
 
     setErrors(newErrors);
@@ -58,7 +53,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
     setLoading(true);
     try {
-      const result = await api.login(email.trim(), password);
+      const result = await api.login(username.trim(), password);
 
       if (result.success && result.user && result.token) {
         await login(
@@ -142,20 +137,19 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         {/* Form */}
         <View style={styles.form}>
           <TextInput
-            label="Email"
-            placeholder="Enter your admin email"
-            value={email}
+            label="Username"
+            placeholder="Enter your admin username"
+            value={username}
             onChangeText={(text) => {
-              setEmail(text);
-              if (errors.email) setErrors((e) => ({ ...e, email: undefined }));
+              setUsername(text);
+              if (errors.username)
+                setErrors((e) => ({ ...e, username: undefined }));
             }}
-            error={errors.email}
-            keyboardType="email-address"
+            error={errors.username}
             autoCapitalize="none"
-            autoComplete="email"
             leftIcon={
               <Ionicons
-                name="mail-outline"
+                name="person-outline"
                 size={18}
                 color={colors.textMuted}
               />

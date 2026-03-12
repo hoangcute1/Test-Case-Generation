@@ -18,7 +18,6 @@ import { Card } from "../../components/ui/Card";
 import { LoadingView, ErrorView, EmptyView } from "../../components/ui/StateViews";
 import { useFocusEffect } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
-
 type Props = {
   navigation: NativeStackNavigationProp<any>;
 };

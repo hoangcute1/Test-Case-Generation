@@ -25,7 +25,7 @@ JIRA_OAUTH = OAuth2Client(
 ADMIN_REDIRECT_URL = "http://localhost:8000/admin"
 
 
-async def admin_auth(request: AdminAuthRequest) -> RedirectResponse:
+async def admin_auth(request: AdminAuthRequest):
     if request.username == settings.ADMIN_USERNAME and request.password == settings.ADMIN_PASSWORD:
         session_token = _generate_token()
         await cache_set(
@@ -35,7 +35,10 @@ async def admin_auth(request: AdminAuthRequest) -> RedirectResponse:
             },
             expire_in=60 * 60
         )
-        return RedirectResponse(ADMIN_REDIRECT_URL)
+        return {
+            "token": session_token,
+            "redirect_url": ADMIN_REDIRECT_URL
+        }
 
     raise HTTPException(status_code=401, detail="Unauthorized")
 
