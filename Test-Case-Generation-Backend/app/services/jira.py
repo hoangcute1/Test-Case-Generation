@@ -3,8 +3,11 @@ import httpx
 from atlassian.jira import Jira
 from app.core.config import settings
 from app.models.jira import JiraToken
+from typing import Optional
+import json
 
 ATLASSIAN_RESOURCES_URL = "https://api.atlassian.com/oauth/token/accessible-resources"
+JIRA_ME_URL = "https://api.atlassian.com/me"
 
 
 async def _get_access_token(key: str) -> str:
@@ -16,6 +19,30 @@ async def _get_access_token(key: str) -> str:
     except Exception as e:
         raise RuntimeError(f"Failed to get Jira access token: {e}")
     return access_token
+
+
+async def get_jira_user_info(access_token: str):
+    """Fetch Jira/Atlassian account info using the access token."""
+    headers = {"Authorization": f"Bearer {access_token}"}
+    async with httpx.AsyncClient(timeout=30) as client:
+        user_info = await client.get(JIRA_ME_URL, headers=headers)
+
+    user_info.raise_for_status()
+    user_info = user_info.json()
+
+    # remove any id-like fields before sending to frontend
+    if isinstance(user_info, dict):
+        # Atlassian uses 'accountId' or 'id' keys
+        user_info.pop("id", None)
+        user_info.pop("accountId", None)
+        # if wrapped under 'user'
+        if "user" in user_info and isinstance(user_info["user"], dict):
+            user_info["user"].pop("id", None)
+            user_info["user"].pop("accountId", None)
+
+    user_info_json = json.dumps(user_info) if user_info is not None else "null"
+
+    return user_info_json
 
 
 async def _get_cloud_id(access_token: str) -> str:

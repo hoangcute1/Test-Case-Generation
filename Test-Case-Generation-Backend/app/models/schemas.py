@@ -8,6 +8,15 @@ class GenericResponse(BaseModel):
     detail: str
 
 
+class AdminAuthResponse(BaseModel):
+    redirect_url: str
+
+
+class AdminAuthRequest(BaseModel):
+    username: str
+    password: str
+
+
 class JiraAuthResponse(BaseModel):
     redirect_url: str
 

@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from app.api.routes import llm, system, srs, auth, export, postman
+from app.api.routes import llm, system, srs, auth, export, postman, admin
 from starlette.middleware.sessions import SessionMiddleware
 from app.core.config import settings
 from app.core.llm import ollama_init
@@ -22,13 +22,15 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# CORS middleware for handling cross-origin requests
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=["http://localhost:*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 # Session middleware for stateful authentication and user context
 app.add_middleware(
     SessionMiddleware,
@@ -53,3 +55,5 @@ app.include_router(llm.router, tags=["LLM"])
 app.include_router(export.router, tags=["Export"], deprecated=True)
 
 app.include_router(postman.router, tags=["Postman"], prefix="/postman")
+
+app.include_router(admin.router, tags=["Admin"], prefix="/admin")
